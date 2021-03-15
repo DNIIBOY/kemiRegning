@@ -3,16 +3,6 @@ from molmass import Formula
 
 decimals = 4
 
-def substanceTable(substancesSym, coEffiList, n, molMass, massList):
-    table = Table(show_header=True, header_style="cyan")
-    table.add_column("Af: Daniel Nettelfield")
-    [table.add_column(i) for i in substancesSym]
-    table.add_row(*(["Koefficient"] + [str(i) for i in coEffiList]))
-    table.add_row(*(["Stofmængde \[mol]"] + [str(round(i, decimals)) for i in n]))
-    table.add_row(*(["Molarmasse \[g/mol]"] + [str(round(i, decimals)) for i in molMass]))
-    table.add_row(*(["Masse \[g]"] + [str(round(i, decimals)) for i in massList]))
-    return table
-
 
 def indexTable(substancesSym, coEffiList, molMass):
     table = Table(show_header=True, header_style="cyan")
@@ -21,6 +11,17 @@ def indexTable(substancesSym, coEffiList, molMass):
     table.add_row(*(["Koefficient"] + [str(i) for i in coEffiList]))
     table.add_row(*(["Molarmasse [g/mol]"] + [str(round(i, decimals)) for i in molMass]))
     table.add_row(*(["Index Værdi"] + [str(i + 1) for i in range(len(substancesSym))]))
+    return table
+
+
+def substanceTable(substancesSym, coEffiList, n, molMass, massList):
+    table = Table(show_header=True, header_style="cyan")
+    table.add_column("Af: Daniel Nettelfield")
+    [table.add_column(i) for i in substancesSym]
+    table.add_row(*(["Koefficient"] + [str(i) for i in coEffiList]))
+    table.add_row(*(["Stofmængde \[mol]"] + [str(round(i, decimals)) for i in n]))
+    table.add_row(*(["Molarmasse \[g/mol]"] + [str(round(i, decimals)) for i in molMass]))
+    table.add_row(*(["Masse \[g]"] + [str(round(i, decimals)) for i in massList]))
     return table
 
 

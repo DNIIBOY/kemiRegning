@@ -4,6 +4,7 @@ import os
 fileName = "kemi"
 decimals = 4
 
+
 def export(substancesSym, coEffiList, n, molMass, massList, inputIndex):
     try:
         book = xlsxwriter.Workbook(fileName + ".xlsx")

@@ -5,54 +5,87 @@ from molmass import Formula
 import os
 import sys
 from balance import balance
-from tables import titrationTable, molarTable, manualBalance, indexTable, substanceTable
-from exports import export, exportTitration
+import tables
+import exports
+from functions import consider
+import functions
 
 
-fileName = "kemi"
-decimals = 4
+class Reaction:
+    def __init__(self, reactants, products):
+        self.reactants = reactants.replace(' ', '').split("+")
+        if products != "":
+            self.products = products.replace(' ', '').split("+")
+            self.substances = self.reactants + self.products
+            self.substancesSym = ["+ " + i if self.reactants.index(i) != 0 else i for i in self.reactants] + [
+                "+ " + x if self.products.index(x) != 0 else "-> " + x for x in self.products]
+            self.molMass = [Formula(x).mass for x in self.substances]
+            self.coEffiList, self.n, self.massList, self.inputIndex = [], [], [], 0
 
-os.system('mode con: cols=80 lines=15')
-pretty.install()
-console = Console()
+    def balance(self, coEfs = ()):
+        if len(coEfs) == 0:
+            self.coEffiList = balance(self.reactants, self.products)
+        else:
+            self.coEffiList = [x for x in coEfs]
+        return self.coEffiList
+
+    def calculate(self, knownMassIndex, knownMass):
+        substances = self.substances
+        molMass = self.molMass
+        coEffiList = self.coEffiList
+        oneKnownMol = knownMass / molMass[knownMassIndex] / coEffiList[knownMassIndex]
+        self.n = [sub * oneKnownMol for sub in coEffiList]
+        self.massList = [self.n[i] * molMass[i] for i in range(len(substances))]
+        self.massList[knownMassIndex] = knownMass
+        self.inputIndex = knownMassIndex + 1
+
+    def createManualBalanceTable(self):
+        self.manualBalanceTable = tables.manualBalance(self.substancesSym, self.molMass)
+        return self.manualBalanceTable
+
+    def createIndexTable(self):
+        self.indexTable = tables.indexTable(self.substancesSym, self.coEffiList, self.molMass)
+        return self.indexTable
+
+    def createSubstanceTable(self):
+        self.subTable = tables.substanceTable(self.substancesSym, self.coEffiList, self.molMass, self.n, self.massList)
+        return self.subTable
+
+    def createMolarTable(self):
+        self.molarTable = tables.molarTable(self.reactants)
+        return self.molarTable
+
+    def roundAll(self, deci):
+        self.molMass = [round(x, deci) for x in self.molMass]
+        if self.n:
+            self.n = [round(x, deci) for x in self.n]
+            self.massList = [round(x, deci) for x in self.massList]
+
+    def exportSubstance(self):
+        exports.export(self.substancesSym, self.coEffiList, self.n, self.molMass, self.massList, self.inputIndex)
+
+class Titration:
+    def __init__(self, titrant, titrator, v_titrant, v_titrator, c_titrator):
+        self.titrant = titrant
+        self.titrator = titrator
 
 
 def titration():
     try:
         console.clear()
         console.print("Indsæt titrant, husk store og små bogstaver.", "[blue]Titrant: [/blue]", sep="\n", end="")
-        titrant = input()
-        if consider(titrant) == "c":
-            return
+        titrant = consider(input())
         console.print("Indsæt titrator, husk store og små bogstaver.", "[blue]Titrator: [/blue]", sep="\n", end="")
-        titrator = input()
-        if consider(titrator) == "c":
-            return
+        titrator = consider(input())
         console.clear()
+
         console.print(f"Titrant volumen i [blue]liter[/blue] ([green]{titrant}[/green]): ", end="")
-        v_titrant = input()
-        if consider(v_titrant) == "c":
-            return
-        else:
-            v_titrant = fixfloat(v_titrant)
-
+        v_titrant = consider(input())
         console.print(f"Titrator volumen i [blue]liter[/blue] ([green]{titrator}[/green]): ", end="")
-        v_titrator = input()
-        if consider(v_titrator) == "c":
-            return
-        else:
-            v_titrator = fixfloat(v_titrator)
-
+        v_titrator = consider(input())
         console.print(f"Titrator koncentration i [blue]mol/L[/blue] ([green]{titrator}[/green]): ", end="")
-        c_titrator = input()
-        if consider(c_titrator) == "c":
-            return
-        else:
-            c_titrator = fixfloat(c_titrator)
+        c_titrator = consider(input())
 
-        n_tit = c_titrator * v_titrator
-        c_titrant = n_tit / v_titrant
-        titTable = titrationTable(titrant, titrator, v_titrant, v_titrator, float(c_titrant), float(c_titrator), n_tit)
         console.clear()
         console.print(titTable)
         option = input("\nTast (e) for at eksportere. Tryk enter for at starte igen: ")
@@ -68,116 +101,73 @@ def titration():
         console.print(f"Der skete en fejl", 2 * "\n", e, "\n")
         input("Tryk enter for at prøve igen")
 
+def run():
+    console.clear()
+    try:
+        console.print("Indsæt reaktanter, husk store og små bogstaver og ingen koefficienter.",
+                      "[blue]Reaktanter: [/blue]", sep="\n", end="")
+        reactants = consider(input())
 
-def fixfloat(num):
-    if "," in num:
-        num = float(num.replace(",", "."))
-    else:
-        num = eval(num)
-    return float(num)
+        if reactants == "t":
+            titration()
+            return run()
+        console.print("Indsæt Produkter, husk store og små bogstaver og ingen koefficienter.",
+                      "[blue]Produkter: [/blue]", sep="\n", end="")
+        products = consider(input())
+        react = Reaction(reactants, products)
+        if not products:
+            react.createMolarTable()
+            console.clear()
+            console.print(react.molarTable)
+            consider(input("Tryk enter for at starte igen: "))
+
+        console.print("Skal reaktionsskemaet automatisk afstemmes? ([green]j[/green]/[red]n[/red]): ", end="")
+        autoBalance = consider(input())
+        if autoBalance.lower() == "j":
+            react.balance()
+        elif autoBalance.lower() == "n":
+            manualTable = manualBalance(substancesSym, molMass)
+            console.clear()
+            console.print(manualTable)
+            coEffiList = [int(input(f"Indsæt koefficient {i}: ")) for i in range(1, len(substances) + 1)]
+            react.balance([coEffiList])
+        else:
+            consider(autoBalance)
+            console.print("Ugyldigt input")
 
 
-def consider(inp):
-    inp = inp.lower()
-    if inp == "q":
+        react.createIndexTable()
         console.clear()
-        sys.exit()
-    elif inp == "c":
-        return "c"
+        console.print(react.indexTable)
+
+        knownMassIndex = int(consider(input("Indsæt index værdi af stoffet med en kendt masse: "))) -1
+        knownMass = consider(input(f"Hvad er massen af {react.substances[knownMassIndex]} i gram?: "))
+
+        react.calculate(knownMassIndex, knownMass)
+        react.roundAll(decimals)
+        react.createSubstanceTable()
+
+        console.clear()
+        console.print(react.subTable)
+
+        option = consider(input("\nTast (e) for at eksportere. Tryk enter for at starte igen: "))
+        if option.lower() == "e":
+            react.exportSubstance()
+
+        return run()
+
+    except Exception as e:
+        console.print(f"Der skete en fejl", 2 * "\n", e, "\n")
+        input("Tryk enter for at prøve igen")
+        return run()
 
 
 if __name__ == "__main__":
-    while True:
-        console.clear()
-        try:
-            console.print("Indsæt reaktanter, husk store og små bogstaver og ingen koefficienter.",
-                          "[blue]Reaktanter: [/blue]", sep="\n", end="")
-            reactants = input()
-            if consider(reactants) == "c":
-                continue
-            elif reactants == "t":
-                titration()
-                continue
-            console.print("Indsæt Produkter, husk store og små bogstaver og ingen koefficienter.",
-                          "[blue]Produkter: [/blue]", sep="\n", end="")
-            products = input()
+    fileName = "kemi"
+    decimals = 8
 
-            if consider(products) == "c":
-                continue
+    os.system('mode con: cols=80 lines=15')
+    pretty.install()
+    console = Console()
 
-            elif products == "":
-                reactants = reactants.replace(' ', '').split("+")
-                mTable = molarTable(reactants)
-                console.clear()
-                console.print(mTable)
-                consider(input("Tryk enter for at starte igen: "))
-                continue
-
-            reactants = reactants.replace(' ', '').split("+")
-            products = products.replace(' ', '').split("+")
-            substancesSym = ["+ " + i if reactants.index(i) != 0 else i for i in reactants] + [
-                "+ " + x if products.index(x) != 0 else "-> " + x for x in products]
-
-            substances = reactants + products
-            molMass = [Formula(x).mass for x in substances]
-
-            console.print("Skal reaktionsskemaet automatisk afstemmes? ([green]j[/green]/[red]n[/red]): ", end="")
-            autoBalance = input()
-            if autoBalance.lower() == "j":
-
-                coEffiList = balance(reactants, products)
-
-            elif autoBalance.lower() == "n":
-                manualTable = manualBalance(substancesSym, molMass)
-                console.clear()
-                console.print(manualTable)
-                coEffiList = [int(input(f"Indsæt koefficient {i}: ")) for i in range(1, len(substances) + 1)]
-
-            else:
-                consider(autoBalance)
-                console.print("Ugyldigt input")
-                continue
-
-            console.clear()
-            table = indexTable(substancesSym, coEffiList, molMass)
-            console.print(table)
-
-            knownMassIndex = input("Indsæt index værdi af stoffet med en kendt masse: ")
-            if consider(knownMassIndex) == "c":
-                continue
-
-            knownMassIndex = int(knownMassIndex) - 1
-            knownMass = input(f"Hvad er massen af {substances[knownMassIndex]} i gram?: ")
-            if consider(knownMass) == "c":
-                continue
-
-            knownMass = fixfloat(knownMass)
-
-            oneKnownMol = knownMass / molMass[knownMassIndex] / coEffiList[knownMassIndex]
-
-            calcSub = substances.pop(knownMassIndex)
-            calcCoEffi = coEffiList.pop(knownMassIndex)
-            calcMolMass = molMass.pop(knownMassIndex)
-
-            n = [sub * oneKnownMol for sub in coEffiList]
-            massList = [n[i] * molMass[i] for i in range(len(substances))]
-
-            substances.insert(knownMassIndex, calcSub)
-            coEffiList.insert(knownMassIndex, calcCoEffi)
-            molMass.insert(knownMassIndex, calcMolMass)
-            massList.insert(knownMassIndex, knownMass)
-            n.insert(knownMassIndex, knownMass / molMass[knownMassIndex])
-
-            console.clear()
-            table = substanceTable(substancesSym, coEffiList, n, molMass, massList)
-            console.print(table)
-
-            option = input("\nTast (e) for at eksportere. Tryk enter for at starte igen: ")
-            if consider(option) == "c":
-                continue
-            elif option.lower() == "e":
-                export(substancesSym, coEffiList, n, molMass, massList, knownMassIndex + 1)
-
-        except Exception as e:
-            console.print(f"Der skete en fejl", 2 * "\n", e, "\n")
-            input("Tryk enter for at prøve igen")
+    run()
