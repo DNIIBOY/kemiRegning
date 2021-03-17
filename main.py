@@ -7,8 +7,13 @@ import sys
 from balance import balance
 import tables
 import exports
-from functions import consider
-import functions
+
+fileName = "kemi"
+decimals = 4
+
+os.system('mode con: cols=80 lines=15')
+pretty.install()
+console = Console()
 
 
 class Reaction:
@@ -22,7 +27,7 @@ class Reaction:
             self.molMass = [Formula(x).mass for x in self.substances]
             self.coEffiList, self.n, self.massList, self.inputIndex = [], [], [], 0
 
-    def balance(self, coEfs = ()):
+    def balance(self, coEfs=()):
         if len(coEfs) == 0:
             self.coEffiList = balance(self.reactants, self.products)
         else:
@@ -48,7 +53,7 @@ class Reaction:
         return self.indexTable
 
     def createSubstanceTable(self):
-        self.subTable = tables.substanceTable(self.substancesSym, self.coEffiList, self.molMass, self.n, self.massList)
+        self.subTable = tables.substanceTable(self.substancesSym, self.coEffiList, self.n, self.molMass, self.massList)
         return self.subTable
 
     def createMolarTable(self):
@@ -64,10 +69,51 @@ class Reaction:
     def exportSubstance(self):
         exports.export(self.substancesSym, self.coEffiList, self.n, self.molMass, self.massList, self.inputIndex)
 
+
 class Titration:
     def __init__(self, titrant, titrator, v_titrant, v_titrator, c_titrator):
         self.titrant = titrant
         self.titrator = titrator
+        self.v_titrant = v_titrant
+        self.v_titrator = v_titrator
+        self.c_titrator = c_titrator
+        self.n_tit = self.c_titrator * self.v_titrator
+        self.c_titrant = self.n_tit / v_titrant
+
+    def roundAll(self, deci):
+        self.v_titrant = round(self.v_titrant, deci)
+        self.v_titrator = round(self.v_titrator, deci)
+        self.c_titrator = round(self.c_titrator, deci)
+        self.n_tit = round(self.n_tit, deci)
+        self.c_titrant = round(self.c_titrant, deci)
+
+    def createTable(self):
+        self.titTable = tables.titrationTable(self.titrant, self.titrator, self.v_titrant, self.v_titrator,
+                                              self.c_titrant, self.c_titrator, self.n_tit)
+        return self.titTable
+
+    def export(self):
+        exports.exportTitration(self.titrant, self.titrator, self.v_titrant, self.v_titrator, self.c_titrator)
+
+
+def consider(inp):
+    if inp.lower() == "q":
+        console.clear()
+        sys.exit()
+    elif inp.lower() == "c":
+        return run()
+    else:
+        try:
+            if "," in inp:
+                return float(inp.replace(",", "."))
+            elif inp == "":
+                return inp
+            else:
+                return eval(inp)
+        except ValueError:
+            return inp
+        except NameError:
+            return inp
 
 
 def titration():
@@ -86,20 +132,26 @@ def titration():
         console.print(f"Titrator koncentration i [blue]mol/L[/blue] ([green]{titrator}[/green]): ", end="")
         c_titrator = consider(input())
 
+        tit = Titration(titrant, titrator, v_titrant, v_titrator, c_titrator)
+        tit.roundAll(decimals)
+        tit.createTable()
+
         console.clear()
-        console.print(titTable)
+        console.print(tit.titTable)
         option = input("\nTast (e) for at eksportere. Tryk enter for at starte igen: ")
         consider(option)
         if option.lower() == "e":
-            return exportTitration(titrant, titrator, v_titrant, v_titrator, c_titrator)
+            return tit.export()
 
     except ValueError:
         console.print("Skal være et tal, prøv igen")
         input()
         return titration()
     except Exception as e:
+        raise
         console.print(f"Der skete en fejl", 2 * "\n", e, "\n")
         input("Tryk enter for at prøve igen")
+
 
 def run():
     console.clear()
@@ -132,15 +184,13 @@ def run():
             coEffiList = [int(input(f"Indsæt koefficient {i}: ")) for i in range(1, len(substances) + 1)]
             react.balance([coEffiList])
         else:
-            consider(autoBalance)
             console.print("Ugyldigt input")
-
 
         react.createIndexTable()
         console.clear()
         console.print(react.indexTable)
 
-        knownMassIndex = int(consider(input("Indsæt index værdi af stoffet med en kendt masse: "))) -1
+        knownMassIndex = int(consider(input("Indsæt index værdi af stoffet med en kendt masse: "))) - 1
         knownMass = consider(input(f"Hvad er massen af {react.substances[knownMassIndex]} i gram?: "))
 
         react.calculate(knownMassIndex, knownMass)
@@ -157,17 +207,11 @@ def run():
         return run()
 
     except Exception as e:
+        raise
         console.print(f"Der skete en fejl", 2 * "\n", e, "\n")
         input("Tryk enter for at prøve igen")
         return run()
 
 
 if __name__ == "__main__":
-    fileName = "kemi"
-    decimals = 8
-
-    os.system('mode con: cols=80 lines=15')
-    pretty.install()
-    console = Console()
-
     run()

@@ -38,7 +38,7 @@ def export(substancesSym, coEffiList, n, molMass, massList, inputIndex):
             return export(substancesSym, coEffiList, n, molMass, massList, inputIndex)
 
 
-def exportTitration(titrant, titrator, v_titrant, v_titrator , c_titrator):
+def exportTitration(titrant, titrator, v_titrant, v_titrator, c_titrator):
     try:
         book = xlsxwriter.Workbook(fileName + ".xlsx")
         sheet = book.add_worksheet("Titrering")
