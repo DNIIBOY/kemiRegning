@@ -1,6 +1,6 @@
 # Kemiregning
 
-# Normal møngdeberegning:
+# Normal mængdeberegning:
 
 Skriv reaktion uden at afstemme, og del op ved reaktionspil.
 
