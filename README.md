@@ -15,6 +15,7 @@ Her kan du selv indsætte koeffiecinter for stofferne i reaktionen
 ![image](https://user-images.githubusercontent.com/32793938/112298459-55a8ac80-8c97-11eb-9a3b-99409e864b54.png)
 
 Dette giver en tabel der ser således ud:
+
 ![image](https://user-images.githubusercontent.com/32793938/112298673-77099880-8c97-11eb-81e6-ff76de7bacd6.png)
 
 Nu skal du bare indsætte index værdien af det stof som du kender massen af. Så hvis jeg kender massen af Cl2 skriver jeg 2 her.
