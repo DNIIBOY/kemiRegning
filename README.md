@@ -1,6 +1,6 @@
 # Kemiregning
 
-#Normal møngdeberegning:
+# Normal møngdeberegning:
 
 Skriv reaktion uden at afstemme, og del op ved reaktionspil.
 
@@ -27,7 +27,7 @@ Nu får du en tabel med alle værdierne du skal bruge fra din reaktion. Hvis du 
 
 ![image](https://user-images.githubusercontent.com/32793938/112299543-31999b00-8c98-11eb-95cf-54a039f48242.png)
 
-#Titrering
+# Titrering
 
 Hvis du ønsker at lave titrering kan du taste "t" for at åbne titreringstilstanden. 
 Her indtaster du titranten (Den i kolben) og titratoreren (Den i burretten)
