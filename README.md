@@ -14,6 +14,7 @@ Det er vigtigt med store og små bogstaver
 
 Hvis du ønsker at afstemme reaktionen selv, så svar nej til spørgsmålet.
 Her kan du selv indsætte koeffiecinter for stofferne i reaktionen
+
 ![image](https://user-images.githubusercontent.com/32793938/112298459-55a8ac80-8c97-11eb-9a3b-99409e864b54.png)
 
 Dette giver en tabel der ser således ud:
