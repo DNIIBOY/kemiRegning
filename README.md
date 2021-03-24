@@ -1,6 +1,6 @@
-# kemiRegning
+# Kemiregning
 
-Normal møngdeberegning:
+#Normal møngdeberegning:
 
 Skriv reaktion uden at afstemme, og del op ved reaktionspil.
 
@@ -9,6 +9,7 @@ Denne reaktion: H2 + Cl2 -> 2HCl
 Skal altså skrives sådan:
 
 ![image](https://user-images.githubusercontent.com/32793938/112296925-90a9e080-8c95-11eb-840f-e20ad51aa3fb.png)
+Det er vigtigt med store og små bogstaver
 
 Hvis du ønsker at afstemme reaktionen selv, så svar nej til spørgsmålet.
 Her kan du selv indsætte koeffiecinter for stofferne i reaktionen
@@ -24,3 +25,9 @@ Derefter skal du giver massen af stoffet. Dette virker også med brøker, hvis d
 Nu får du en tabel med alle værdierne du skal bruge fra din reaktion. Hvis du vil have tallene i et excel ark kan du taste "e" her for at eksportere det. Ellers trykker du bare enter for at starte igen.
 
 ![image](https://user-images.githubusercontent.com/32793938/112299543-31999b00-8c98-11eb-95cf-54a039f48242.png)
+
+#Titrering
+
+Hvis du ønsker at lave titrering kan du taste "t" for at åbne titreringstilstanden. 
+Her indtaster du titranten (Den i kolben) og titratoreren (Den i burretten)
+
