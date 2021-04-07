@@ -8,6 +8,7 @@ from balance import balance
 import tables
 import exports
 
+
 fileName = "kemi"
 decimals = 4
 
@@ -18,8 +19,8 @@ console = Console()
 
 class Reaction:
     def __init__(self, reactants, products):
-        self.reactants = reactants.replace(' ', '').split("+")
-        if products != "":
+        self.reactants = str(reactants).replace(' ', '').split("+")
+        if products:
             self.products = products.replace(' ', '').split("+")
             self.substances = self.reactants + self.products
             self.substancesSym = ["+ " + i if self.reactants.index(i) != 0 else i for i in self.reactants] + [
@@ -96,26 +97,6 @@ class Titration:
         exports.exportTitration(self.titrant, self.titrator, self.v_titrant, self.v_titrator, self.c_titrator)
 
 
-def consider(inp):
-    if inp.lower() == "q":
-        console.clear()
-        sys.exit()
-    elif inp.lower() == "c":
-        return run()
-    else:
-        try:
-            if "," in inp:
-                return float(inp.replace(",", "."))
-            elif inp == "":
-                return inp
-            else:
-                return eval(inp)
-        except ValueError:
-            return inp
-        except NameError:
-            return inp
-
-
 def titration():
     try:
         console.clear()
@@ -148,9 +129,25 @@ def titration():
         input()
         return titration()
     except Exception as e:
-        raise
         console.print(f"Der skete en fejl", 2 * "\n", e, "\n")
         input("Tryk enter for at prøve igen")
+
+def consider(inp):
+    if inp.lower() == "q":
+        console.clear()
+        sys.exit()
+    elif inp.lower() == "c":
+        return run()
+    else:
+        try:
+            if "," in inp:
+                return float(inp.replace(",", "."))
+            elif inp == "":
+                return inp
+            else:
+                return eval(inp)
+        except (ValueError, NameError):
+            return inp
 
 
 def run():
@@ -160,7 +157,9 @@ def run():
                       "[blue]Reaktanter: [/blue]", sep="\n", end="")
         reactants = consider(input())
 
-        if reactants == "t":
+        if not reactants:
+            return run()
+        elif reactants == "t":
             titration()
             return run()
         console.print("Indsæt Produkter, husk store og små bogstaver og ingen koefficienter.",
@@ -172,19 +171,22 @@ def run():
             console.clear()
             console.print(react.molarTable)
             consider(input("Tryk enter for at starte igen: "))
+            return run()
 
         console.print("Skal reaktionsskemaet automatisk afstemmes? ([green]j[/green]/[red]n[/red]): ", end="")
         autoBalance = consider(input())
         if autoBalance.lower() == "j":
             react.balance()
         elif autoBalance.lower() == "n":
-            manualTable = manualBalance(substancesSym, molMass)
+            manualTable = tables.manualBalance(react.substancesSym, react.molMass)
             console.clear()
             console.print(manualTable)
-            coEffiList = [int(input(f"Indsæt koefficient {i}: ")) for i in range(1, len(substances) + 1)]
+            coEffiList = [int(input(f"Indsæt koefficient {i}: ")) for i in range(1, len(react.substances) + 1)]
             react.balance([coEffiList])
         else:
             console.print("Ugyldigt input")
+
+        print("mojn do")
 
         react.createIndexTable()
         console.clear()
@@ -207,7 +209,6 @@ def run():
         return run()
 
     except Exception as e:
-        raise
         console.print(f"Der skete en fejl", 2 * "\n", e, "\n")
         input("Tryk enter for at prøve igen")
         return run()
