@@ -178,11 +178,11 @@ def run():
         if autoBalance.lower() == "j":
             react.balance()
         elif autoBalance.lower() == "n":
-            manualTable = manualBalance(substancesSym, molMass)
+            manualTable = react.createManualBalanceTable()
             console.clear()
             console.print(manualTable)
-            coEffiList = [int(input(f"Indsæt koefficient {i}: ")) for i in range(1, len(substances) + 1)]
-            react.balance([coEffiList])
+            coEffiList = [int(input(f"Indsæt koefficient for {react.substances[i-1]}: ")) for i in range(1, len(react.substances) + 1)]
+            react.balance(coEffiList)
         else:
             console.print("Ugyldigt input")
 
