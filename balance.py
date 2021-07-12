@@ -1,4 +1,5 @@
 import re
+from chempy import balance_stoichiometry
 from sympy import Matrix, lcm
 
 
@@ -41,7 +42,7 @@ def compoundDecipher(compound, index, side, elementMatrix, elementList):
         findElements(segment, index, multiplier, side, elementMatrix, elementList)
 
 
-def balance(reactants, products):
+def balance(reactants: list, products: list) -> list:
     global console
     elementMatrix, elementList = [], []
     for i in range(len(reactants)):
@@ -57,3 +58,8 @@ def balance(reactants, products):
     return [coEffi[i][0] for i in range(len(reactants))] + [coEffi[i + len(reactants)][0] for i in range(len(products))]
 
 
+if __name__ == "__main__":
+    print("---Afstemning---")
+    reac = input("Reaktanter: ").replace(' ', '').split("+")
+    prod = input("Produkter: ").replace(' ', '').split("+")
+    print(balance(reac, prod))

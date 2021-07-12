@@ -9,7 +9,7 @@ def indexTable(substancesSym, coEffiList, molMass):
     table.add_column("Af: Daniel Nettelfield")
     [table.add_column(i) for i in substancesSym]
     table.add_row(*(["Koefficient"] + [str(i) for i in coEffiList]))
-    table.add_row(*(["Molarmasse [g/mol]"] + [str(round(i, decimals)) for i in molMass]))
+    table.add_row(*(["Molarmasse \[g/mol]"] + [str(round(i, decimals)) for i in molMass]))
     table.add_row(*(["Index Værdi"] + [str(i + 1) for i in range(len(substancesSym))]))
     return table
 

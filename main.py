@@ -1,12 +1,11 @@
 from rich import *
 from rich.console import Console
 from rich import pretty
-from molmass import Formula
 import os
 import sys
-from balance import balance
 import tables
 import exports
+import chempy
 
 
 fileName = "kemi"
@@ -25,12 +24,14 @@ class Reaction:
             self.substances = self.reactants + self.products
             self.substancesSym = ["+ " + i if self.reactants.index(i) != 0 else i for i in self.reactants] + [
                 "+ " + x if self.products.index(x) != 0 else "-> " + x for x in self.products]
-            self.molMass = [Formula(x).mass for x in self.substances]
+            self.molMass = [chempy.chemistry.Substance.from_formula(x).molar_mass() for x in self.substances]
+            self.molMass = [float(x) for x in self.molMass]
             self.coEffiList, self.n, self.massList, self.inputIndex = [], [], [], 0
 
     def balance(self, coEfs=()):
         if len(coEfs) == 0:
-            self.coEffiList = balance(self.reactants, self.products)
+            reacts, prods = chempy.balance_stoichiometry(self.reactants, self.products)
+            self.coEffiList = [x for x in reacts.values()] + [x for x in prods.values()]
         else:
             self.coEffiList = [x for x in coEfs]
         return self.coEffiList
@@ -132,6 +133,7 @@ def titration():
         console.print(f"Der skete en fejl", 2 * "\n", e, "\n")
         input("Tryk enter for at prøve igen")
 
+
 def consider(inp):
     if inp.lower() == "q":
         console.clear()
@@ -208,10 +210,14 @@ def run():
 
         return run()
 
-    except Exception as e:
+    except KeyboardInterrupt:
+        os.system("cls")
+        pass
+
+    """except Exception as e:
         console.print(f"Der skete en fejl", 2 * "\n", e, "\n")
         input("Tryk enter for at prøve igen")
-        return run()
+        return run()"""
 
 
 if __name__ == "__main__":
